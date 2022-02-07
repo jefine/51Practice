@@ -134,3 +134,4 @@ gulu/MDK-ARM/.cmsis/*
 gulu/MDK-ARM/.eide/*
 gulu/MDK-ARM/build/*
 gulu/MDK-ARM/JLinkLog.txt
+**/.eide/   
