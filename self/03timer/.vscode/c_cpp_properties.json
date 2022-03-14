@@ -4,7 +4,7 @@
             "name": "win32",
             "configurationProvider": "cl.eide",
             "includePath": [
-                "E:\\mdkArmkeil5\\C51\\INC"
+                "e:/mdkArmkeil5/C51/INC/**"
             ],
         }
     ],
