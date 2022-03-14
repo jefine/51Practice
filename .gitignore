@@ -130,8 +130,6 @@ dkms.conf
 *.l1p
 *.l2p
 *.iex
-gulu/MDK-ARM/.cmsis/*
-gulu/MDK-ARM/.eide/*
-gulu/MDK-ARM/build/*
-gulu/MDK-ARM/JLinkLog.txt
-**/.eide/   
+
+**/.eide/
+**/build/
