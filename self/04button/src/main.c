@@ -1,15 +1,24 @@
 #include "STC15F2K60S2.h" 
+#include "INTRINS.H"
+
 unsigned int cnt = 0;
 unsigned int state = 0;
 
-unsigned char trg = 0;
+unsigned char key_val = 0;
 unsigned char cont = 0;
-unsigned char key_value;
+unsigned char key_value = 0;
 //判断trg的值，4个按键值分别为0x01 0x02 0x04 0x08
+//通过简单的三行代码,神奇的异或运算，将其运行
+// void read_key_simple(){
+// 	unsigned char read_data = P3 ^ 0xff;
+// 	key_val = read_data & (read_data ^ cont);
+// 	cont = read_data;
+// }
+
 void read_key_simple(){
-	unsigned char read_data = P3 ^ 0xff;
-	trg = read_data & (read_data ^ cont);
-	cont = read_data;
+  unsigned char t = P3 ^ 0xff;
+  key_val = t & (t ^ cont);
+  cont = t;
 }
 //通过按键控制状态机
 unsigned char read_key(){
@@ -83,12 +92,21 @@ void Time0() interrupt 1
 
 int main()
 {
-  Timer0Init();
+  //Timer0Init();
   P2 = P2 & 0x1f | 0x80;
   P0 = 0x00;
- 
+  
 
   while(1){
-   
+  read_key_simple();
+  if(key_val == 0x01){
+    P0 = 0x0e;
+  }else if(key_val == 0x02){
+    P0 = 0x0d;
+  }else if(key_val == 0x04){
+    P0 = 0x0b;
+  }else if(key_val == 0x08){
+    P0 = 0x07;
+  }
   }
 }
