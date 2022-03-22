@@ -1,10 +1,20 @@
 #include "STC15F2K60S2.h" 
-#define key_in P3
 unsigned int cnt = 0;
 unsigned int state = 0;
+
+unsigned char trg = 0;
+unsigned char cont = 0;
+unsigned char key_value;
+//判断trg的值，4个按键值分别为0x01 0x02 0x04 0x08
+void read_key_simple(){
+	unsigned char read_data = P3 ^ 0xff;
+	trg = read_data & (read_data ^ cont);
+	cont = read_data;
+}
+
 unsigned char read_key(){
-  unsigned char key,key_value;
-  key = key_in & 0x0f;
+  unsigned char key,key_value=0;
+  key = P3 & 0x0f;
   //0x0f=00001111
   switch(state){
     case 0: //判断按键是否按下
@@ -15,15 +25,15 @@ unsigned char read_key(){
     case 1: //通过定时器消抖，并判断键值
       if(key != 0x0f){ //再次判断，防止按键抖动。如果key_in不等于0x0f，则说明按键确实按下
         if(key == 0x0e){
+          //0x0e=00001110
           key_value = 1;
         }else if(key == 0x0d){
+          //0x0d=00001101
           key_value = 2;
         }else if(key == 0x0b){
           key_value = 3;
         }else if(key == 0x07){
           key_value = 4;
-        }else{
-          key_value = 0;
         }
         state = 2;
       }
@@ -48,21 +58,35 @@ void Timer0Init(void)		//1毫秒@11.0592MHz
 	TH0 = 0xD4;		//设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
+  //add
+  ET0 = 1;		//开定时器0中断
+  EA = 1;		//开总中断
 }
 
-void time0 interrupt 1
+void Time0() interrupt 1
 {
-  if (cnt++ < 10)
-  return;
+  if (cnt++ < 10)return;
   cnt = 0;
-  
-  P2 = P2 & 0x1f | 0x80;
-  P2 = P2 & 0x1f;
+  key_value = read_key();
+  if(key_value == 1){
+    P0 = 0x0e;
+  }else if(key_value == 2){
+    P0 = 0x0d;
+  }else if(key_value == 3){
+    P0 = 0x0b;
+  }else if(key_value == 4){
+    P0 = 0x07;
+  }
 }
 
 int main()
 {
-  {
-    
+  Timer0Init();
+  P2 = P2 & 0x1f | 0x80;
+  P0 = 0x00;
+ 
+
+  while(1){
+   
   }
 }
