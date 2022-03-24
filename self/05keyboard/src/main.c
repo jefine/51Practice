@@ -56,18 +56,7 @@ unsigned char read_keyboard(){
         temp = row | col;
         switch (temp)
         {
-        // case 0x7e:key_value = 1;break;
-        // case 0xbe:key_value = 2;break;
-        // case 0xde:key_value = 3;break;
-        // case 0x7d:key_value = 4;break;
-        // case 0xbd:key_value = 5;break;
-        // case 0xdd:key_value = 6;break;
-        // case 0x7b:key_value = 7;break;
-        // case 0xbb:key_value = 8;break;
-        // case 0xdb:key_value = 9;break;
-        // case 0x77:key_value = 10;break;
-        // case 0xb7:key_value = 11;break;
-        // case 0xd7:key_value = 12;break;
+          //记忆 7bde 7bde
           case 0x77: key_value=4;break;
 					case 0x7b: key_value=5;break;
 					case 0x7d: key_value=6;break;
