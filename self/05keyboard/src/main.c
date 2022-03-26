@@ -54,6 +54,7 @@ unsigned char read_keyboard(){
       //   {
       //     col = 0x70;
       //   }
+      //由高到低 7dbe
       if(P44==0)	col=0x70;
       if(P42==0)	col=0xb0;
       if(P35==0)	col=0xd0;
@@ -62,7 +63,6 @@ unsigned char read_keyboard(){
         switch (temp)
         {
           //记忆 7bde 7bde
-
           case 0x77: key_value=4;break;
 					case 0x7b: key_value=5;break;
 					case 0x7d: key_value=6;break;
