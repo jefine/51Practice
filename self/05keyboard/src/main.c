@@ -19,7 +19,6 @@ void Timer0Init(void)		//1毫秒@12.000MHz
   ET0 = 1;
   EA = 1;
 }
-
 unsigned char read_keyboard(){
   unsigned char temp,row,col,key_value;
   // row -> 1;
@@ -81,6 +80,7 @@ unsigned char read_keyboard(){
       }
       key_statue = 2;
     }
+    else key_statue = 0;
     break;
   case 2:
     P3 = 0x0f;
