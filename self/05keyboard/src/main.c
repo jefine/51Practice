@@ -20,9 +20,9 @@ void Timer0Init(void)		//1毫秒@12.000MHz
   EA = 1;
 }
 unsigned char read_keyboard(){
+  // 归原始值->读值->判断
   unsigned char temp,row,col,key_value;
-  // row -> 1;
-  // col -> 0;
+  // 行置高，列置低
   P3 = 0x0f;
   k6 = 0;
   k7 = 0;
@@ -37,6 +37,8 @@ unsigned char read_keyboard(){
     if(temp != 0x0f)
     {
       row = temp;
+      //列置高，行置低
+      //一定要有 k6，k7置高
       k6 = 1;
       k7 = 1;
       P3 = 0x30;
@@ -91,6 +93,8 @@ unsigned char read_keyboard(){
   return key_value;
 }
 
+
+
 void Timer0Handle() interrupt 1	{ 
   unsigned char key = 0;
   if(time_cnt++ <10)return;
@@ -119,6 +123,5 @@ int main()
   P2 = 0x80;
   while(1)
   {
-    
   }
 }

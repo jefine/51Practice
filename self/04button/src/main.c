@@ -7,6 +7,7 @@ unsigned int state = 0;
 unsigned char key_val = 0;
 unsigned char cont = 0;
 unsigned char key_value = 0;
+
 //判断trg的值，4个按键值分别为0x01 0x02 0x04 0x08
 //通过简单的三行代码,神奇的异或运算，将其运行
 // void read_key_simple(){
@@ -14,7 +15,6 @@ unsigned char key_value = 0;
 // 	key_val = read_data & (read_data ^ cont);
 // 	cont = read_data;
 // }
-
 void read_key_simple(){
   unsigned char t = P3 ^ 0xff;
   key_val = t & (t ^ cont);
