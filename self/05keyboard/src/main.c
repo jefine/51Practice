@@ -42,19 +42,23 @@ unsigned char read_keyboard(){
       k6 = 1;
       k7 = 1;
       P3 = 0x30;
-      temp = P3 & 0x30;
-      if(temp != 0x30 || k6 !=1 || k7!=1)
-      {
-        if(temp!=0x30)col = temp | 0xc0;
-        else if (k6!=1)
-        {
-          col = 0xb0;
-        }
-        else if (k7!=1)
-        {
-          col = 0x70;
-        }
-        temp = row | col;
+      // temp = P3 & 0x30;
+      // if(temp != 0x30 || k6 !=1 || k7!=1)
+      // {
+      //   if(temp!=0x30)col = temp | 0xc0;
+      //   else if (k6!=1)
+      //   {
+      //     col = 0xb0;
+      //   }
+      //   else if (k7!=1)
+      //   {
+      //     col = 0x70;
+      //   }
+      if(P44==0)	col=0x70;
+      if(P42==0)	col=0xb0;
+      if(P35==0)	col=0xd0;
+      if(P34==0)	col=0xe0;
+      temp = row | col;
         switch (temp)
         {
           //记忆 7bde 7bde
@@ -79,7 +83,7 @@ unsigned char read_keyboard(){
 					case 0xed: key_value=18;break;
 					case 0xee: key_value=19;break;	
         }
-      }
+      //}
       key_statue = 2;
     }
     else key_statue = 0;
