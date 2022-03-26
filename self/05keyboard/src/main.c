@@ -57,6 +57,7 @@ unsigned char read_keyboard(){
         switch (temp)
         {
           //记忆 7bde 7bde
+
           case 0x77: key_value=4;break;
 					case 0x7b: key_value=5;break;
 					case 0x7d: key_value=6;break;
@@ -80,7 +81,6 @@ unsigned char read_keyboard(){
       }
       key_statue = 2;
     }
-    
     break;
   case 2:
     P3 = 0x0f;

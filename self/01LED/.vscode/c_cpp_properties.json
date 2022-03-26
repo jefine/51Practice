@@ -5,7 +5,7 @@
             "configurationProvider": "cl.eide",
             "includePath": [
                 "E:\\mdkArmkeil5\\C51\\INC"
-            ],
+            ]
         }
     ],
     "version": 4
