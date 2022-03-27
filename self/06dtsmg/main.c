@@ -26,7 +26,7 @@ void Timer0Handle() interrupt 1
   P0 = T_COM[cnt];
   P2 = 0xc0;
   P2 = 0;
-  P0 = ~t_display[cnt];
+  P0 = ~t_display[cnt+32];
   P2 = 0xe0;
   P2 = 0;
   cnt++;
