@@ -60,7 +60,8 @@ unsigned int read_temperature(){
 	
 	low = Read_DS18B20();    //读低位
 	high = Read_DS18B20();    //读高位
-	temp = high * 256 + low;    //高低位连接在一起
+	temp = high << 8 | low;    //高低位连接在一起
+	//temp = high *256 + low;
 	temperature = temp * 0.0625;
 	temp = temperature * 100;
 	return temp;
