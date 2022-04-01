@@ -45,26 +45,46 @@ void Timer0Init(void)		//1毫秒@12.000MHz
 }
 
 unsigned int read_temperature(){
-	float temperature;
+	// float temperature;
+	// unsigned int temp;
+	// unsigned char low,high;
+	
+	// init_ds18b20();    //初始化
+	// Write_DS18B20(0xcc);    //写0xcc
+	// Write_DS18B20(0x44);    //写0x44
+	// Delay_OneWire(200);    //延时
+	
+	// init_ds18b20();    //初始化
+	// Write_DS18B20(0xcc);    //写0xcc
+	// Write_DS18B20(0xbe);    //写0xbe
+	
+	// low = Read_DS18B20();    //读低位
+	// high = Read_DS18B20();    //读高位
+	// temp = high << 8 | low;    //高低位连接在一起
+	// //temp = high *256 + low;
+	// temperature = temp * 0.0625;
+	// temp = temperature * 100;
+	// return temp;
+
+	float temper;
+	unsigned char high,low;
 	unsigned int temp;
-	unsigned char low,high;
 	
-	init_ds18b20();    //初始化
-	Write_DS18B20(0xcc);    //写0xcc
-	Write_DS18B20(0x44);    //写0x44
-	Delay_OneWire(200);    //延时
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0x44);
+	Delay_OneWire(200);
+
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0x48);
 	
-	init_ds18b20();    //初始化
-	Write_DS18B20(0xcc);    //写0xcc
-	Write_DS18B20(0xbe);    //写0xbe
-	
-	low = Read_DS18B20();    //读低位
-	high = Read_DS18B20();    //读高位
-	temp = high << 8 | low;    //高低位连接在一起
-	//temp = high *256 + low;
-	temperature = temp * 0.0625;
-	temp = temperature * 100;
-	return temp;
+
+	low = Read_DS18B20();
+	high = Read_DS18B20();
+	temp = high<<8 | low;
+	temper =temp * 0.0625;
+	return temper * 100;
 }
 
 void display_temp_smg(){
