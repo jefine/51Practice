@@ -1,15 +1,26 @@
 #include "stc15f2k60s2.h" 
 #include "ds1302.h" 
 int cnt =0;
-void Delay100ms()		//@12.000MHz
+void Delay10ms()		//@12.000MHz
+{
+	unsigned char i, j;
+
+	i = 11;
+	j = 184;
+	do
+	{
+		while (--j);
+	} while (--i);
+}
+void Delay1000ms()		//@12.000MHz
 {
 	unsigned char i, j, k;
 
 	_nop_();
 	_nop_();
-	i = 5;
-	j = 144;
-	k = 71;
+	i = 46;
+	j = 153;
+	k = 245;
 	do
 	{
 		do
@@ -81,11 +92,11 @@ void Timer0Handle() interrupt 1
 
 int main()
 {
-  write_time(10,10,20);
+  write_time(0,0,0);
   Timer0Init();
   while(1)
   {
     read_time();
-    Delay100ms();
+    Delay1000ms();
   }
 }
