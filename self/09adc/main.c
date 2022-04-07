@@ -32,15 +32,16 @@ void Delay1000ms()		//@12.000MHz
 
 void Timer0Init(void)		//1毫秒@12.000MHz
 {
-	AUXR |= 0x80;		//定时器时钟1T模式
+	AUXR &= 0x7F;		//定时器时钟12T模式
 	TMOD &= 0xF0;		//设置定时器模式
-	TL0 = 0x20;		//设置定时初始值
-	TH0 = 0xD1;		//设置定时初始值
+	TL0 = 0x18;		//设置定时初值
+	TH0 = 0xFC;		//设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
   ET0 = 1;
   EA = 1;
 }
+
 void Timer0Handle() interrupt 1
 {
   P0 = T_COM[cnt];
@@ -58,7 +59,6 @@ int main()
   int value;
   Timer0Init();
   write_adc(1);
-  write_dac((unsigned char) (1/5.0*255));
   while(1)
   {
     ET0 = 0;
@@ -67,7 +67,7 @@ int main()
     smg_buf[0] = value /100 +32;
     smg_buf[1] = value /10 %10;
     smg_buf[2] = value %10;
-    
+    write_dac((unsigned char)(2/5.0*255));
     Delay1000ms();
     
   }

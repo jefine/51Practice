@@ -17,5 +17,4 @@ unsigned char IIC_RecByte(void);
 unsigned char read_adc(unsigned char add);
 void write_adc(unsigned char add);
 void write_dac(unsigned char data1);
-
 #endif
