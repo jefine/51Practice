@@ -46,7 +46,7 @@ void get_wave(){
 	while(wave_cnt--)
   {
     TX = 1;
-    Delay13us();
+    Delay13us(); 
     TX = 0;
     Delay13us();
   }
