@@ -39,12 +39,17 @@ void send_wave(){ //发送八段脉冲波(40Khz)
 	}
 }
 
-void get_wave(){ //200ms执行一次
-
-	unsigned int time, distance;
+void get_wave(){ 
+	unsigned int time, distance,wave_cnt=8;
 	
 	EA = 0;
-	send_wave();
+	while(wave_cnt--)
+  {
+    TX = 1;
+    Delay13us();
+    TX = 0;
+    Delay13us();
+  }
 	EA = 1;
 	
 	TH1 = 0;
@@ -57,8 +62,8 @@ void get_wave(){ //200ms执行一次
 		TF1 = 0;
 	}	
 	else{ //RX == 0,接收到信号。
-		time = (TH1 * 256) + TL1;//time必须16位，TH1为高位，TL1为低位。
-		distance = (unsigned int)((time * 0.017 * 12) / 11.0592);//本身数值乘以0.017公式是官方给的对于12MHZ的晶振的由于实际使用的是11.05926MHZ所以这么算
+		time = (TH1 <<8 ) | TL1;//time必须16位，TH1为高位，TL1为低位。
+		distance = (unsigned int)(time * 0.017);//34 000 / 1000 000 / 2
 		smg_buf[0] = distance / 100;
 		smg_buf[1] = distance / 10 % 10;
 		smg_buf[2] = distance % 10;
@@ -77,6 +82,7 @@ void Timer0Init(void)		//1毫秒@12.000MHz
   EA = 1;
 }
 
+
 void Timer0Handle() interrupt 1
 {
   P0 = T_COM[cnt%8];
@@ -86,7 +92,7 @@ void Timer0Handle() interrupt 1
   P2 = 0xe0;
   P2 = 0;
   cnt++;
-  if(cnt==200) 
+  if(cnt==400) 
   {
     get_wave();
     cnt=0;
