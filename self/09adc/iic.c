@@ -13,14 +13,14 @@ void write_dac(unsigned char data1){
 	IIC_Stop();
 }
 
-void write_adc(unsigned char add){
-	IIC_Start();		  //启动
-	IIC_SendByte(0x90);   //写入0x90，选择PCF8591，准备写入通道
-	IIC_WaitAck();		  //等待
-	IIC_SendByte(add);    //写入1或3，1为光敏电阻通道，3为滑变通道
-	IIC_WaitAck();		  //等待
-	IIC_Stop();           //总线停止
-}
+// void write_adc(unsigned char add){
+// 	IIC_Start();		  //启动
+// 	IIC_SendByte(0x90);   //写入0x90，选择PCF8591，准备写入通道
+// 	IIC_WaitAck();		  //等待
+// 	IIC_SendByte(add);    //写入1或3，1为光敏电阻通道，3为滑变通道
+// 	IIC_WaitAck();		  //等待
+// 	IIC_Stop();           //总线停止
+// }
 
 unsigned char read_adc(unsigned char add){
 	unsigned char temp;
@@ -29,6 +29,7 @@ unsigned char read_adc(unsigned char add){
 	IIC_WaitAck();		  //等待
 	IIC_SendByte(add);    //写入1或3，1为光敏电阻通道，3为滑变通道
 	IIC_WaitAck();		  //等待
+
 	IIC_Start();		  //启动
 	IIC_SendByte(0x91);   //写入0x91，准备读出数据
 	IIC_WaitAck();		  //等待

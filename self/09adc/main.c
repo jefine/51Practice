@@ -58,11 +58,10 @@ int main()
 {
   int value;
   Timer0Init();
-  write_adc(1);
   while(1)
   {
     ET0 = 0;
-    value = (int)(read_adc(1)*1.9608);
+    value = (int)(read_adc(1)*500.0/255);
     ET0 = 1;
     smg_buf[0] = value /100 +32;
     smg_buf[1] = value /10 %10;
