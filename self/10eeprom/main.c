@@ -1,9 +1,10 @@
 #include "stc15f2k60s2.h" 
+#include "iic.h"
 int cnt = 0;
 // 数码管 8毫秒扫描一遍
 // 每毫秒 点亮一个数码管，这样才能保持视觉延迟。
 //（如果放在一起去操作，那么除了最后一个，其他的都会亮度极低）
-
+unsigned char smg_buf[8] = {0};
 unsigned char  t_display[]={                       //标准字库
 //   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
     0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71,
@@ -13,24 +14,42 @@ unsigned char  t_display[]={                       //标准字库
 
 unsigned char T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //位码
 
+void Delay100ms()		//@12.000MHz
+{
+	unsigned char i, j, k;
+
+	_nop_();
+	_nop_();
+	i = 5;
+	j = 144;
+	k = 71;
+	do
+	{
+		do
+		{
+			while (--k);
+		} while (--j);
+	} while (--i);
+}
 
 void Timer0Init(void)		//1毫秒@12.000MHz
 {
-	AUXR |= 0x80;		//定时器时钟1T模式
+	AUXR &= 0x7F;		//定时器时钟12T模式
 	TMOD &= 0xF0;		//设置定时器模式
-	TL0 = 0x20;		//设置定时初始值
-	TH0 = 0xD1;		//设置定时初始值
+	TL0 = 0x18;		//设置定时初值
+	TH0 = 0xFC;		//设置定时初值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
   ET0 = 1;
   EA = 1;
 }
+
 void Timer0Handle() interrupt 1
 {
   P0 = T_COM[cnt];
   P2 = 0xc0;
   P2 = 0;
-  P0 = ~t_display[cnt];
+  P0 = ~t_display[smg_buf[cnt]];
   P2 = 0xe0;
   P2 = 0;
   cnt++;
@@ -40,6 +59,15 @@ void Timer0Handle() interrupt 1
 int main()
 {
   Timer0Init();
+  ET0= 0;
+  // write_at2402(0x14,1);
+  // IIC_Delay(200);
+  write_at2402(0x22,0x06);
+  Delay100ms();
+  smg_buf[0] = read_at2402(0x22);
+  // IIC_Delay(200);
+  // smg_buf[0] = read_at2402(0x14);
+  ET0 = 1;
   while(1)
   {
     
