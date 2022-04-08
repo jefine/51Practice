@@ -102,28 +102,6 @@ unsigned char read_key()
 }
 unsigned char key_proc()
 {
-  // switch (key_statue)
-  // {
-  // case 0:
-  //     if(read_key()!=0)key_statue = 1;
-  //     break;
-  // case 1:
-  //     if(read_key() != 0)
-  //     {
-  //       key_statue = 2;
-  //       key_val == read_key();
-  //     }
-  //     else key_statue = 0;
-  //     break;
-  // case 2:
-  //     if(read_key() == 0)
-  //     {
-  //       key_statue = 0;
-  //       key_val = 0;
-  //     }
-  //     break;
-  // }
-  // return key_val;
   unsigned char ucKey_Val, ucKey_Down, ucKey_Up;
   ucKey_Val = read_key();
   ucKey_Down = ucKey_Val & (ucKey_Old ^ ucKey_Val);
@@ -131,6 +109,7 @@ unsigned char key_proc()
   ucKey_Old = ucKey_Val;
   return ucKey_Down;
 }
+
 void main()
 {
   unsigned char key =0;
