@@ -40,8 +40,8 @@ void Timer0Init(void)		//1毫秒@12.000MHz
 	TH0 = 0xD1;		//设置定时初始值
 	TF0 = 0;		//清除TF0标志
 	TR0 = 1;		//定时器0开始计时
-  ET0 = 1;
-  EA = 1;
+	ET0 = 1;
+	EA = 1;
 }
 
 unsigned int read_temperature(){
@@ -77,7 +77,7 @@ unsigned int read_temperature(){
 
 	init_ds18b20();
 	Write_DS18B20(0xcc);
-	Write_DS18B20(0x48);
+	Write_DS18B20(0xbe);
 	
 
 	low = Read_DS18B20();
@@ -123,5 +123,6 @@ int main()
   {
     temp = read_temperature();
     solve_temp_smg(temp);
+	Delay1000ms();
   }
 }

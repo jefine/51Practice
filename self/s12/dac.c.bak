@@ -1,0 +1,7 @@
+#include "iic.h"
+extern unsigned char dac_mode;
+
+void dac()
+{
+	init
+}

@@ -1,20 +1,37 @@
-/*
-  程序说明: 单总线驱动程序
-  软件环境: Keil uVision 4.10 
-  硬件环境: CT107单片机综合实训平台(外部晶振12MHz) STC89C52RC单片机
-  日    期: 2011-8-9
-*/
 #include "onewire.h"
+#include <STC15F2K60S2.H>
 
-sbit DQ = P1^4;  //单总线接口
-//单总线延时函数
-void Delay_OneWire(unsigned int t)  //STC89C52RC
+typedef     unsigned char   u8;
+typedef     unsigned int    u16;
+unsigned int read_temperature(void)
+{
+	u8 low,high;
+	u16 temp;
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0x44);
+	Delay_OneWire(200);
+	
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0xbe);
+	
+	low = Read_DS18B20();
+	high = Read_DS18B20();
+	temp = high<<8 |low;
+	temp =  temp*0.0625*100;
+	
+	return temp;
+}
+
+//单总线内部延时函数
+void Delay_OneWire(unsigned int t)  
 {
 	t*=12;
 	while(t--);
 }
 
-//通过单总线向DS18B20写一个字节
+//单总线写操作
 void Write_DS18B20(unsigned char dat)
 {
 	unsigned char i;
@@ -29,7 +46,7 @@ void Write_DS18B20(unsigned char dat)
 	Delay_OneWire(5);
 }
 
-//从DS18B20读取一个字节
+//单总线读操作
 unsigned char Read_DS18B20(void)
 {
 	unsigned char i;
@@ -49,7 +66,7 @@ unsigned char Read_DS18B20(void)
 	return dat;
 }
 
-//DS18B20设备初始化
+//DS18B20初始化
 bit init_ds18b20(void)
 {
   	bit initflag = 0;
@@ -65,9 +82,3 @@ bit init_ds18b20(void)
   
   	return initflag;
 }
-
-
-
-
-
-
