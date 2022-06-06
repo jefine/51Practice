@@ -55,7 +55,8 @@ int main()
     P0 = ~t_display[x];
     P2 = 0xe0;
     P2 = 0;
-    x ++;
+    x = (x+1)%6;
+     delay50ms();
   }
 }
 
