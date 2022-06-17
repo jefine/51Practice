@@ -1,10 +1,12 @@
 #include "STC15F2K60S2.H"
-#include "ds1302.h"
+#include    "intrins.h"
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-u16 ms;
-u8 HH,MM,SS;
+sbit TX = P1^0;
+sbit RX = P1^1;
+
+u16 ms,distance;
 u8 smg_cnt;
 u8 smg_buf[8] = {0};
 u8 code t_display[]={                       //标准字库
@@ -16,7 +18,48 @@ u8 code t_display[]={                       //标准字库
 
 u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //位码
 
+// 13 = 1 000 000 / 40 000 / 2
+// 所需的是8个40Khz的发送波
+void Delay13us()		//@12.000MHz
+{
+	unsigned char i;
 
+	_nop_();
+	_nop_();
+	i = 36;
+	while (--i);
+}
+
+void send_wave()
+{
+	u8 i=8;
+	while(i--)
+	{
+		TX = 1;
+		Delay13us();
+		TX = 0;
+		Delay13us();
+	}
+}
+void get_wave()
+{
+	u16 time;
+	EA = 0;
+	send_wave();
+	EA = 1;
+
+	TH1 = 0;
+	TL1 = 0;
+	TR1 = 1;
+	while((RX == 1) && (TF1 == 0));
+	TR1 = 0;
+	if(TF1 == 1)TF1 =0;
+	else{
+		time = (TH1 << 8) | TL1;
+		distance = (u16)(time * 34000 /1000000 / 2);
+		//distance = (u16)(time * 0.017);//34 000 / 1000 000 / 2
+	}
+}
 void Timer0Init(void)		//1毫秒@12.000MHz
 {
 	AUXR &= 0x7F;		//定时器时钟12T模式
@@ -39,46 +82,22 @@ void Timer0Handle() interrupt 1
 	P2 = 0;
 	if(smg_cnt++==7)smg_cnt=0;
 
-	if(ms == 100000)ms=0;	
-}
-void read_time()
-{
-	u8 t;
-	EA = 0;
-	t = Read_Ds1302_Byte(0x81);
-	SS = (t>>4)* 10 +(t & 0x0f);
-	t = Read_Ds1302_Byte(0x83);
-	MM = (t>>4)* 10 +(t & 0x0f);
-	t = Read_Ds1302_Byte(0x85);
-	HH = (t>>4)* 10 +(t & 0x0f);
-	EA = 1;
-}
-
-void write_time(u8 hh,u8 mm,u8 ss)
-{
-	EA = 0;
-	Write_Ds1302_Byte(0x8e,0);
-	Write_Ds1302_Byte(0x80,(ss/10)<<4 | ss % 10);
-	Write_Ds1302_Byte(0x82,(mm/10)<<4 | mm % 10);
-	Write_Ds1302_Byte(0x84,(hh/10)<<4 | hh % 10);
-	Write_Ds1302_Byte(0x8e,0x80);
-	EA = 1;
+	if(ms++ == 100000)ms=0;	
 }
 int main()
 {
-	write_time(11,10,30);
+
 	Timer0Init();
 	
 	while(1)
 	{
-		if(ms % 1000==0)read_time();
-		smg_buf[0] = 0;
-		smg_buf[1] = 0;
-		smg_buf[2] = HH / 10;
-		smg_buf[3] = HH % 10;
-		smg_buf[4] = MM / 10;
-		smg_buf[5] = MM % 10;
-		smg_buf[6] = SS / 10;
-		smg_buf[7] = SS % 10;
+		if((ms % 200) ==0)
+		{
+			get_wave();
+			smg_buf[0] = distance / 100;
+			smg_buf[1] = distance / 10 % 10;
+			smg_buf[2] = distance % 10;
+		}
+		
 	}
 }

@@ -44,12 +44,12 @@ void get_wave(){
 	
 	EA = 0;
 	while(wave_cnt--)
-  {
-    TX = 1;
-    Delay13us(); 
-    TX = 0;
-    Delay13us();
-  }
+	{
+		TX = 1;
+		Delay13us(); 
+		TX = 0;
+		Delay13us();
+	}
 	EA = 1;
 	
 	TH1 = 0;
