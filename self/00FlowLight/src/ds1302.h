@@ -1,7 +1,7 @@
 #ifndef __DS1302_H
 #define __DS1302_H
 
-#include <reg52.h>
+#include <STC15F2K60S2.h>
 #include <intrins.h>
 
 sbit SCK = P1^7;		

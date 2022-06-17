@@ -1,11 +1,11 @@
 #include "STC15F2K60S2.H"
-#include "onewire.h"
+#include "ds1302.h"
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-u16 ms = 0;
-u16 temper = 0;
-u8 smg_cnt=0;
+u16 ms;
+u8 HH,MM,SS;
+u8 smg_cnt;
 u8 smg_buf[8] = {0};
 u8 code t_display[]={                       //标准字库
 //   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
@@ -16,30 +16,6 @@ u8 code t_display[]={                       //标准字库
 
 u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //位码
 
-
-//return 298->29.8
-u16 read_temperature()
-{
-	float temper;
-	u8 high,low;
-	u16 temp;
-
-	init_ds18b20();
-	Write_DS18B20(0xcc);
-	Write_DS18B20(0x44);
-	Delay_OneWire(200);
-
-	init_ds18b20();
-	Write_DS18B20(0xcc);
-	Write_DS18B20(0xbe);
-
-	low = Read_DS18B20();
-	high = Read_DS18B20();
-
-	temp = high<<8 | low;
-	temper = temp*0.0625;
-	return temper*10;
-}
 
 void Timer0Init(void)		//1毫秒@12.000MHz
 {
@@ -54,7 +30,6 @@ void Timer0Init(void)		//1毫秒@12.000MHz
 }
 void Timer0Handle() interrupt 1
 {
-	ms++;
 	P0 = T_COM[smg_cnt];
 	P2 = 0xc0;
 	P2 = 0;
@@ -66,21 +41,44 @@ void Timer0Handle() interrupt 1
 
 	if(ms == 100000)ms=0;	
 }
+void read_time()
+{
+	u8 t;
+	EA = 0;
+	t = Read_Ds1302_Byte(0x81);
+	SS = (t>>4)* 10 +(t & 0x0f);
+	t = Read_Ds1302_Byte(0x83);
+	MM = (t>>4)* 10 +(t & 0x0f);
+	t = Read_Ds1302_Byte(0x85);
+	HH = (t>>4)* 10 +(t & 0x0f);
+	EA = 1;
+}
 
+void write_time(u8 hh,u8 mm,u8 ss)
+{
+	EA = 0;
+	Write_Ds1302_Byte(0x8e,0);
+	Write_Ds1302_Byte(0x80,(ss/10)<<4 | ss % 10);
+	Write_Ds1302_Byte(0x82,(mm/10)<<4 | mm % 10);
+	Write_Ds1302_Byte(0x84,(hh/10)<<4 | hh % 10);
+	Write_Ds1302_Byte(0x8e,0x80);
+	EA = 1;
+}
 int main()
 {
+	write_time(11,10,30);
 	Timer0Init();
+	
 	while(1)
 	{
-		if(ms % 500)temper = read_temperature();
+		if(ms % 1000==0)read_time();
 		smg_buf[0] = 0;
 		smg_buf[1] = 0;
-		smg_buf[2] = 0;
-		smg_buf[3] = 0;
-		smg_buf[4] = 0;
-		smg_buf[5] = temper / 100;
-		smg_buf[6] = temper / 10 % 10 + 32;
-		smg_buf[7] = temper % 10;
+		smg_buf[2] = HH / 10;
+		smg_buf[3] = HH % 10;
+		smg_buf[4] = MM / 10;
+		smg_buf[5] = MM % 10;
+		smg_buf[6] = SS / 10;
+		smg_buf[7] = SS % 10;
 	}
-	
 }
