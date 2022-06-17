@@ -6,7 +6,7 @@ void write_dac(unsigned char data1){
 	IIC_Start();
 	IIC_SendByte(0x90);//选定 PCF8591，并且准备写入
 	IIC_WaitAck();
-	IIC_SendByte(0x40);//0010 0000 意思是将da输出打开
+	IIC_SendByte(0x40);//0100 0000 意思是将da输出打开
 	IIC_WaitAck();
 	IIC_SendByte(data1);//写入电压值
 	IIC_WaitAck();

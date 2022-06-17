@@ -1,12 +1,10 @@
 #include "STC15F2K60S2.H"
-#include    "intrins.h"
+#include  "intrins.h"
+#include "iic.h"
 typedef unsigned char u8;
 typedef unsigned int u16;
 
-sbit TX = P1^0;
-sbit RX = P1^1;
-
-u16 ms,distance;
+u16 ms;
 u8 smg_cnt;
 u8 smg_buf[8] = {0};
 u8 code t_display[]={                       //标准字库
@@ -18,48 +16,7 @@ u8 code t_display[]={                       //标准字库
 
 u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //位码
 
-// 13 = 1 000 000 / 40 000 / 2
-// 所需的是8个40Khz的发送波
-void Delay13us()		//@12.000MHz
-{
-	unsigned char i;
 
-	_nop_();
-	_nop_();
-	i = 36;
-	while (--i);
-}
-
-void send_wave()
-{
-	u8 i=8;
-	while(i--)
-	{
-		TX = 1;
-		Delay13us();
-		TX = 0;
-		Delay13us();
-	}
-}
-void get_wave()
-{
-	u16 time;
-	EA = 0;
-	send_wave();
-	EA = 1;
-
-	TH1 = 0;
-	TL1 = 0;
-	TR1 = 1;
-	while((RX == 1) && (TF1 == 0));
-	TR1 = 0;
-	if(TF1 == 1)TF1 =0;
-	else{
-		time = (TH1 << 8) | TL1;
-		distance = (u16)(time * 34000 /1000000 / 2);
-		//distance = (u16)(time * 0.017);//34 000 / 1000 000 / 2
-	}
-}
 void Timer0Init(void)		//1毫秒@12.000MHz
 {
 	AUXR &= 0x7F;		//定时器时钟12T模式
@@ -86,18 +43,26 @@ void Timer0Handle() interrupt 1
 }
 int main()
 {
-
+	u16 Light_value=0;
+	u16 v_value=0;
 	Timer0Init();
+	write_dac(125);
 	
 	while(1)
 	{
-		if((ms % 200) ==0)
+		if(ms%500 == 0)
 		{
-			get_wave();
-			smg_buf[0] = distance / 100;
-			smg_buf[1] = distance / 10 % 10;
-			smg_buf[2] = distance % 10;
+			v_value = (u16)(read_adc(1)*500.0/255);
+			
+			smg_buf[0] = v_value /100 +32;
+			smg_buf[1] = v_value /10 %10;
+			smg_buf[2] = v_value %10;
+
+			Light_value = read_adc(3);
+			smg_buf[4] = Light_value / 1000;
+			smg_buf[5] = Light_value % 1000 /100;
+			smg_buf[6] = Light_value % 100 /10;
+			smg_buf[7] = Light_value % 10;
 		}
-		
 	}
 }
