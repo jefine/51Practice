@@ -1,94 +1,86 @@
 #include "STC15F2K60S2.H"
-
+#include "onewire.h"
 typedef unsigned char u8;
 typedef unsigned int u16;
-u8 light_i=1;
 
-#define LED_SET(x) {EA = 0;P0 = ~(0x01<<(x-1));P2 = (P2 & 0x1f)|0x80;P2 = P2 & 0x1f;EA = 1;}
-//key_old 的初始化状态是根据具体的业务逻辑进行的
-//初始化为我们想要的初始状态所采用的按键。
-u8 key_old=1,key_down,key_up;
-u8 read_key()
+u16 ms = 0;
+u16 temper = 0;
+u8 smg_cnt=0;
+u8 smg_buf[8] = {0};
+u8 code t_display[]={                       //标准字库
+//   0    1    2    3    4    5    6    7    8    9    A    B    C    D    E    F
+    0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0x79,0x71,
+//black  -     H    J    K    L    N    o   P    U     t    G    Q    r   M    y
+    0x00,0x40,0x76,0x1E,0x70,0x38,0x37,0x5C,0x73,0x3E,0x78,0x3d,0x67,0x50,0x37,0x6e,
+    0xBF,0x86,0xDB,0xCF,0xE6,0xED,0xFD,0x87,0xFF,0xEF,0x46};    //0. 1. 2. 3. 4. 5. 6. 7. 8. 9. -1
+
+u8 code T_COM[]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};      //位码
+
+
+//return 298->29.8
+u16 read_temperature()
 {
-	u16 t;
-	u8 key;
-	/*这里为什么第一次将4个引脚置高，而之后置改变两个呢？
-	因为第一次时候需要把其他引脚置高，来确保P44的准确性，算作初始化。
-	而之后因为我们把P44拉低了，所以还需要置高，防止他影响其他的判断，
-	而对于P34，P35我们并没有拉低他们，所以不需要改变。
-	每次只需要把自己拉低的引脚重新置高就可了
-	*/
-	P44 =0 ;P42 = 1;P35 = 1;P34 =1;
-	t = P3;
-	P44 = 1;P42 = 0;
-	t = t<<4 | (P3 & 0x0f);
-	P42 = 1;P35 = 0;
-	t = t<<4 | (P3 & 0x0f);
-	P35 = 1; P34 = 0;
-	t = t<<4 | (P3 & 0x0f);
+	float temper;
+	u8 high,low;
+	u16 temp;
 
-	switch (~t)
-	{
-	case 0x8000:key = 4;break;
-	case 0x4000:key = 5;break;
-	case 0x2000:key = 6;break;
-	case 0x1000:key = 7;break;
-	case 0x0800:key = 8;break;
-	case 0x0400:key = 9;break;
-	case 0x0200:key = 10;break;
-	case 0x0100:key = 11;break;
-	case 0x0080:key = 12;break;
-	case 0x0040:key = 13;break;
-	case 0x0020:key = 14;break;
-	case 0x0010:key = 15;break;
-	case 0x0008:key = 16;break;
-	case 0x0004:key = 17;break;
-	case 0x0002:key = 18;break;
-	case 0x0001:key = 19;break;
-	default:key = 0;
-	}
-	return key;
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0x44);
+	Delay_OneWire(200);
 
+	init_ds18b20();
+	Write_DS18B20(0xcc);
+	Write_DS18B20(0xbe);
+
+	low = Read_DS18B20();
+	high = Read_DS18B20();
+
+	temp = high<<8 | low;
+	temper = temp*0.0625;
+	return temper*10;
 }
-//在里面尽量只改变状态，动作在Main函数或其他函数进行
-void key_proc()
-{
-	u8 key = read_key();
-	//Don't try to find out why,just feel and remember them :）
-	key_down = key & (key ^ key_old);
-	key_up = ~key & (key ^ key_old);
-	key_old = key;
 
-	if(key_down == 12) {
-		light_i--;
-		if(light_i<1)light_i=1;
-	}
-	if(key_down == 16){
-		light_i++;
-		if(light_i>8)light_i=8;
-	}
-	
+void Timer0Init(void)		//1毫秒@12.000MHz
+{
+	AUXR &= 0x7F;		//定时器时钟12T模式
+	TMOD &= 0xF0;		//设置定时器模式
+	TL0 = 0x18;		//设置定时初始值
+	TH0 = 0xFC;		//设置定时初始值
+	TF0 = 0;		//清除TF0标志
+	TR0 = 1;		//定时器0开始计时
+	ET0 = 1;
+	EA = 1;
 }
-void Delay10ms()		//@12.000MHz
+void Timer0Handle() interrupt 1
 {
-	unsigned char i, j;
+	ms++;
+	P0 = T_COM[smg_cnt];
+	P2 = 0xc0;
+	P2 = 0;
 
-	i = 117;
-	j = 184;
-	do
-	{
-		while (--j);
-	} while (--i);
+	P0 = ~t_display[smg_buf[smg_cnt]];
+	P2 = 0xe0;
+	P2 = 0;
+	if(smg_cnt++==7)smg_cnt=0;
+
+	if(ms == 100000)ms=0;	
 }
 
 int main()
 {
-	
+	Timer0Init();
 	while(1)
 	{
-		key_proc();
-		Delay10ms();
-		LED_SET(light_i);
+		if(ms % 500)temper = read_temperature();
+		smg_buf[0] = 0;
+		smg_buf[1] = 0;
+		smg_buf[2] = 0;
+		smg_buf[3] = 0;
+		smg_buf[4] = 0;
+		smg_buf[5] = temper / 100;
+		smg_buf[6] = temper / 10 % 10 + 32;
+		smg_buf[7] = temper % 10;
 	}
 	
 }
