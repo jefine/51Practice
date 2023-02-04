@@ -1,4 +1,4 @@
-# ![Click here to go to the tutorial.](https://jefine.ml/2022/06/16/%E8%93%9D%E6%A1%A5%E6%9D%AF%E5%8D%95%E7%89%87%E6%9C%BA%E6%89%8B%E5%86%8C/)
+# [Click here to go to the tutorial.](https://jefine.ml/2022/06/16/%E8%93%9D%E6%A1%A5%E6%9D%AF%E5%8D%95%E7%89%87%E6%9C%BA%E6%89%8B%E5%86%8C/)
 # Introduction
 This repository is dedicated to providing resources and code examples related to the 51 Single Chip Microcomputer direction of the Blue Bridge Cup. 
 This repository aims to assist in your learning journey by providing tutorials and code analysis.
